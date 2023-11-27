@@ -4,15 +4,15 @@ use std::{
     str::from_utf8,
     thread,
 };
+mod server;
+use server::requests::handle_request;
 fn handle_connection(mut stream: TcpStream) -> Result<()> {
     let mut reader = BufReader::new(&mut stream);
     let mut buffer = [0; 4096];
     match reader.read(&mut buffer) {
         Ok(n) => {
-            if n == 0 {
-                return Ok(());
-            }
             println!("Received {} bytes: {:?}", n, from_utf8(&buffer[..n]));
+            handle_request(from_utf8(&buffer[..n]).unwrap())
         }
         Err(e) => {
             eprintln!("Error reading from stream: {}", e);
