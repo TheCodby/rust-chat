@@ -1,5 +1,5 @@
 use std::{
-    io::{BufReader, Read, Result},
+    io::{BufReader, Read, Result, Write},
     net::{TcpListener, TcpStream},
     str::from_utf8,
     thread,
@@ -12,7 +12,10 @@ fn handle_connection(mut stream: TcpStream) -> Result<()> {
     match reader.read(&mut buffer) {
         Ok(n) => {
             println!("Received {} bytes: {:?}", n, from_utf8(&buffer[..n]));
-            handle_request(from_utf8(&buffer[..n]).unwrap())
+            let response: String = handle_request(from_utf8(&buffer[..n]).unwrap());
+            let response_bytes = response.as_bytes();
+            stream.write_all(response_bytes)?;
+            stream.flush()?;
         }
         Err(e) => {
             eprintln!("Error reading from stream: {}", e);
